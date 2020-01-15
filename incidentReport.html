@@ -1,0 +1,234 @@
+<!--author: Karina Lin, Julia Klugherz, Katherine Gao-->
+
+{% extends "base.html" %}
+
+{% block content %}
+{% if submit is sameas false %}
+    <h6 id="message" style="padding: 10px;">not yet saved</h6>
+{% endif %}
+
+{% if submit is sameas true %}
+    <h1 id="form-title">Report an Incident</h1>
+{% else %}
+    <h1 id="form-title">Edit an Incident</h1>
+{% endif %}
+
+
+<div class="row justify-content-center">
+<form action="{{url_for('incidentReport')}}" method="post" enctype="multipart/form-data" id="submissionform">
+    
+    <h2 class="form-headings">Reporter Information</h2>
+    <div class="form-group">
+    <h7 hidden id="reportID" value={{incidentInfo.reportID}}> {{incidentInfo.reportID}} </h7>
+
+    
+<fieldset>
+    <legend id="anon1">Do you want to remain anonymous to the person you are reporting?</legend>
+<div class="form-check form-check-inline">
+    <input class="form-check-input" type="radio" name="anon-r" id="anon-ry" value="1" required {% if 1==incidentInfo.anonymousToReported %} checked="checked"{% endif %}>
+    <label class="form-check-label" for="anon-ry" >Yes</label>
+</div>
+<div class="form-check form-check-inline">
+    <input class="form-check-input" type="radio" name="anon-r" id="anon-rn" value="0" required {% if 0==incidentInfo.anonymousToReported %} checked="checked"{% endif %}>
+    <label class="form-check-label" for="anon-rn">No</label>
+</div>
+</fieldset>
+
+<fieldset>
+    <legend id="anon2">Do you want to remain anonymous to everyone?</legend>
+<div class="form-check form-check-inline">
+    <input class="form-check-input" type="radio" name="anon-all" id="anon-all-y" value="1" required {% if 1==incidentInfo.anonymousToAll %} checked="checked"{% endif %}>
+    <label class="form-check-label" for="anon-all-y">Yes</label>
+</div>
+<div class="form-check form-check-inline">
+    <input class="form-check-input" type="radio" name="anon-all" id="anon-all-n" value="0" required {% if 0==incidentInfo.anonymousToAll %} checked="checked"{% endif %}>
+    <label class="form-check-label" for="anon-all-n">No</label>
+</div> 
+</fieldset>
+<br>
+
+    <label for="advocate"> Advocate Name:
+    <select name="advocate" id="advocate">
+            <option value="">Advocate
+    {% for fac in facStaff %}
+            <option value="{{fac.BNUM}}" {% if fac.BNUM==incidentInfo.advocateID %} selected="selected"{% endif %}> {{fac.name}} </option>
+    {% endfor %}
+            </select>
+    </label> <br>
+    
+    <h2 class="form-headings"> Incident Information </h2>
+    <label for="faculty"> Who are you reporting?
+   
+    <select name="faculty" id="faculty">
+            <option value="">Reported
+    {% for fac in facStaff %}
+            <option value= "{{fac.BNUM}}" {% if fac.BNUM==incidentInfo.reportedID %} selected="selected"{% endif %}>{{fac.name}}</option>
+    {% endfor %}
+            </select>
+    </label> <br>
+    
+    
+    <label for="location"> Location of Incident:
+        <input id="location" type="text" name="location" size="30" value = "{{incidentInfo.location}}" required autofocus>
+    </label> <br>
+    
+    
+    <label for="date"> Date of Incident: 
+        <input type="date" id="date" value = "{{incidentInfo.dateOfIncident}}" name="date" required>
+    </label> <br>
+    
+    <script>
+        // This function sets the maximum choice for the date of incident to the current 
+        // day so that users cannot select a date in the future!
+        $(function() {
+            var dtToday = new Date();
+
+            var month = dtToday.getMonth() + 1;
+            var day = dtToday.getDate();
+            var year = dtToday.getFullYear();
+            if (month < 10)
+                month = '0' + month.toString();
+            if (day < 10)
+                day = '0' + day.toString();
+
+            var maxDate = year + '-' + month + '-' + day;
+
+            $('#date').attr('max', maxDate);
+        });
+    </script>
+    
+    <label for="category" > Type of Incident: 
+    <select name="category" id="category" required>
+            <option value="">
+            <option value= "racism" {% if incidentInfo.category=="racism" %} selected="selected"{% endif %}>Racism</option>
+            <option value= "ableism" {% if incidentInfo.category == "ableism" %} selected="selected"{% endif %}>Ableism</option>
+            <option value= "sexism" {% if incidentInfo.category == "sexism" %} selected="selected"{% endif %}>Sexism</option>
+            <option value= "sexual harassment" {% if incidentInfo.category=="sexual harassment" %} selected="selected"{% endif %}>Sexual Harassment</option>
+            <option value= "other" {% if incidentInfo.category == "other" %} selected="selected"{% endif %}>Other</option>
+        </select>
+    </label> <br>
+    
+    <label for="description"> Description of the incident:
+        <textarea name="description" id="description" rows="10" cols="30" required> {{incidentInfo.description}}</textarea>
+    </label>
+    
+    {% if submit == True %}
+        <p><label for="file">Upload a file: <input type="file" id="file" name="file" ></label></p>
+    
+        <p id="enter"> <input class="btn btn-outline-success" type='submit' value='Submit'> </p>
+    {% endif %}
+    
+</form>
+</div>
+
+
+    <script>
+        var advocateDropDown = document.getElementById("advocate");
+        var advocate = advocateDropDown.options[advocateDropDown.selectedIndex].value;
+
+        var reportedDropDown = document.getElementById("faculty");
+        var reported = reportedDropDown.options[reportedDropDown.selectedIndex].value;
+        
+        if (advocate == reported) {
+            $("message").html("test");
+        }
+        /* global $ */
+
+        $("#description").change(function(){
+            $("#message").html("Updating changes...");
+            updateIncident();
+        });
+        
+        $("#advocate").change(function(){
+            $("#message").html("Updating changes...");
+            updateIncident();
+        });
+        
+        $("#anon-ry").change(function(){
+            $("#message").html("Updating changes...");
+            updateIncident();
+        });
+        
+         $("#anon-rn").change(function(){
+             $("#message").html("Updating changes...");
+            updateIncident();
+        });
+        
+         $("#anon-all-y").change(function(){
+             $("#message").html("Updating changes...");
+            updateIncident();
+        });
+        
+         $("#anon-all-n").change(function(){
+             $("#message").html("Updating changes...");
+            updateIncident();
+        });
+        
+         $("#faculty").change(function(){
+             $("#message").html("Updating changes...");
+            updateIncident();
+        });
+        
+         $("#location").change(function(){
+             $("#message").html("Updating changes...");
+            updateIncident();
+        });
+        
+         $("#date").change(function(){
+             $("#message").html("Updating changes...");
+            updateIncident();
+        });
+        
+         $("#category").change(function(){
+             $("#message").html("Updating changes...");
+            updateIncident();
+        });
+        
+        function updateIncident() {
+            const reportID = document.getElementById("reportID").getAttribute("value");
+            const anonToReported = $("input:radio[name=anon-r]:checked").val();
+
+            const anonToAll = $("input:radio[name=anon-all]:checked").val();
+
+            var advocateDropDown = document.getElementById("advocate");
+            var advocate = advocateDropDown.options[advocateDropDown.selectedIndex].value;
+
+            var reportedDropDown = document.getElementById("faculty");
+            var reported = reportedDropDown.options[reportedDropDown.selectedIndex].value;
+
+            const locationValue = document.getElementById('location').value;
+
+            const date = document.getElementById('date').value;
+
+            var categoryDropDown = document.getElementById("category");
+            var category = categoryDropDown.options[categoryDropDown.selectedIndex].value;
+
+            const description = document.getElementById('description').value;
+            
+            console.log(reportID);
+            console.log(description);
+
+            $.get("{{url_for('updateIncident')}}", {"reportID": reportID, 
+                                                "anonymousToReported": anonToReported,
+                                                "anonymousToAll": anonToAll,
+                                                "advocateID": advocate,
+                                                "reportedID": reported,
+                                                "location": locationValue,
+                                                "date": date,
+                                                "category": category,
+                                                "description": description
+                                                }, showSuccessMessage)
+        }
+        
+        function showSuccessMessage(obj) {
+            if(obj.error) {
+                $("#errors").empty().html('Error: '+obj.err);
+            } else {
+                $("#message").html("Change Saved Successfully");
+            }
+    }
+    
+
+    </script>
+
+{% endblock %}

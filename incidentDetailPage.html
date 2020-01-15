@@ -1,0 +1,53 @@
+<!--author: Karina Lin, Julia Klugherz, Katherine Gao-->
+
+
+{% extends "base.html" %}
+
+{% block content %}
+    <body>
+        <div id="detail-box" class="row justify-content-center">
+        Incident ID: {{incident.reportID}} <br>
+        {% if session.get('role') == "facstaff" or session.get('admin') %}
+            <!-- Only for admin and facstaff --> 
+            Reporter: <!-- Anonymize if necessary -->
+        {% endif %}  
+        
+        {% if session.get('role') == "facstaff" %}
+            {% if incident.anonymousToReported %}
+                Anonymous
+            {% else %}
+                {{incident.reporterName}}
+            {% endif %}
+        {% endif %}
+        
+        {% if session.get('admin') %}
+            {% if incident.anonymousToAll %}
+                <td>Anonymous</td>
+            {% else %}
+                <td>{{incident.reporterName}}</td> 
+            {% endif %}
+        {% endif %}
+        <br>
+        
+        Reported: {{incident.reportedName}} <br>
+        Advocate: {{incident.advocateName}} <br>
+        Location: {{incident.location}} <br>
+        Category: {{incident.category}} <br>
+        Date of Incident: {{incident.dateOfIncident}} <br>
+        Description: {{incident.description}} 
+        
+        </div>
+        
+        {% if session.get('role') == "student" %}
+        <div id="delete" class="row justify-content-center">
+        <div class="form-group">
+        <form action="{{ url_for('deleteIncident', id=incident.reportID) }}">
+            <input class="btn btn-danger" type="submit" value="Delete Incident">
+        </form>
+        </div>
+        </div>
+        {% endif %}
+        
+    </body>
+{% endblock %}
+</html>

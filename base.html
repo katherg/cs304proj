@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang='en'>
+<link rel='stylesheet' href="{{url_for('static',filename='report-style.css')}}">
+
+<head>
+    <meta charset='utf-8'>
+    <meta name=author content="Karina Lin, Julia Klugherz, Katherine Gao">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+    
+    <title>{{ page_title }}</title>
+
+    {% block headstuff %}{% endblock %}
+</head>
+
+<body>
+
+<p id="flash">
+        {% with messages = get_flashed_messages() %} 
+            {% if messages %} 
+                {% for message in messages %}
+                    <div id="alert-msg" class="alert alert-info alert-dismissible" role="alert">
+                      <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                        {{ message }}
+                    </div>
+                {% endfor %} 
+            {% endif %} 
+        {% endwith %}
+</p>
+    
+    {% if userID == None %}
+    <div class="login-wrap">
+	<div class="login-html">
+	    <h1 id="title">Incident Reporter</h1>
+		<input id="tab-1" type="radio" name="tab" class="sign-in" checked><label for="tab-1" class="tab">Sign In</label>
+		<input id="tab-2" type="radio" name="tab" class="sign-up"><label for="tab-2" class="tab">Sign Up</label>
+		
+		<div class="login-form">
+			<div class="sign-in-htm">
+			    <form id="loginform" action="{{url_for('login')}}" method="post">
+				<div class="group">
+					<label for="email" class="label">Email: </label>
+					<input id="email" name="email" required type="email" class="input">
+				</div>
+				<div class="group">
+					<label for="password" class="label">Password: </label>
+					<input type="password" name="password" id="password" required class="input"></input>
+				</div>
+				
+				<div class="group">
+					<button name="submit" type="submit" class="button">Submit</button>
+				</div>
+				
+				<div class="hr"></div>
+				</form>
+			</div>
+      
+      <div class="sign-up-htm">
+          <form id="joinform" action="{{url_for('join')}}" method="post">
+                <div class="group">
+                  <p><label for="name" class="label">Name: </label>
+                      <input class="input" id="name" name="name" required></p>
+                </div>
+                
+                <div class="group">
+					<p><label for="email-j" class="label">Email: </label>
+                    <input class="input" id="email-j" name="email-j" required type="email"></p>
+				</div>
+				
+				<div class="group">
+					<p><label for="password1" class="label">Password: </label>
+                    <input class="input" type="password" id="password1" name="password1" required></p>
+				</div>
+				
+				<div class="group">
+					<p><label for=password2 class="label">Repeat Password: </label>
+                    <input class="input" type="password" id="password2" name="password2" required></p>
+                </div>
+
+                    <fieldset> 
+                    <legend class="label"> Type of Account: </legend>
+                    <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="radio" name="userType" id="fac-staff" value="facstaff">
+                    <label class="form-check-label" for="fac-staff">Faculty/Staff Member</label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="radio" name="userType" id="stud" value="student">
+                    <label class="form-check-label" for="stud">Student</label>
+                    </div>
+                    </fieldset>
+				<div class="group">
+					<p><button type="submit" class="button">Submit</button></p>
+				</div>
+				
+				<div class="hr"></div>
+				
+				</form>
+			</div>
+		</div>
+	</div>
+</div>
+    
+
+    {% else %} 
+    <!--- Navigation bar content varies depending on user type !--->
+        
+    <nav class="navbar navbar-expand-lg navbar-light" style="background-color: rgba(33, 208, 226, 0.5);">
+        
+        
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+        <ul class="navbar-nav mr-auto">
+            <li class="nav-item">
+            <a class="nav-item nav-link" href="{{url_for('home')}}">Home</a>
+            </li>
+            {% if userType == "student" %}
+            <li class="nav-item">
+                <a class="nav-item nav-link" href="{{url_for('studentInbox')}}">Incidents You've Reported</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-item nav-link" href="{{url_for('incidentReport')}}">Report an Incident</a>
+            </li>
+            {% endif %}
+    
+            {% if userType == "facstaff" %}
+                <li class="nav-item">
+                <a class="nav-item nav-link" href="{{url_for('facstaffInbox')}}">Incidents Reported Against You</a>
+                </li>
+                <li class="nav-item">
+                <a class="nav-item nav-link" href="{{url_for('advocateInbox')}}">Incidents For Which You are an Advocate</a>
+                </li>
+            {% endif %} 
+        
+            {% if admin %}
+                <li class="nav-item">
+                    <a class="nav-item nav-link" href="{{url_for('adminInbox')}}">All Incidents</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-item nav-link" href="{{url_for('aggregate')}}">Aggregate Data Dashboard</a>
+                </li>
+            {% endif %}
+        </ul>
+        <span class="navbar-text">
+          Your BNumber is {{ userID }}
+        </span>
+        
+        <form class="form-inline" id="log-out" action="{{ url_for('logout') }}">
+        <input class="btn btn-sm btn-outline-secondary" name="log-out" type="submit" value="Log Out">
+        </form>
+        
+        </div>
+        </div>
+    </nav>
+    
+
+    {% endif %}
+    
+
+    <div id="content">
+        {% block content %}{% endblock %}
+    </div>
+    
+    <footer>
+        {% block footer %}
+        <br>
+        <br><p style="padding: 10px"> Created by Karina Lin, Katherine Gao, and Julia Klugherz as a final project for CS304 </p>
+        {% endblock %}
+    </footer>
+
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+</body>
+</html>

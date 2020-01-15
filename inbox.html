@@ -1,0 +1,106 @@
+<!--author: Karina Lin, Julia Klugherz, Katherine Gao-->
+
+{% extends "base.html" %}
+
+{% block content %}
+<body>
+    <table class="table table-hover" id="incident-list">
+  <thead>
+    <tr>
+      <th scope="col">Report ID</th>
+      <th scope="col">Incident Date</th>
+      
+      {% if userType == "facstaff" or admin %}
+                    <!-- Only for admin and facstaff --> 
+                    <th>Reporter</th> <!-- Anonymize if necessary -->
+                    {% endif %}
+       
+       {% if userType == "student" or admin %}
+                    <!-- Only for student and admin -->
+                    <th>Reported</th> <!-- Will be ID, maybe we can do an inner join to get the name of this person later on -->
+                    {% endif %}
+                    
+      <th scope="col">Advocate</th>
+      <th scope="col">Description</th>
+      
+      {% if userType == "student" or admin %}
+      <th scope="col">Attachments</th>
+      {% endif %}
+      
+      {% if userType == "student" %}
+      <th scope="col">Edit</th>
+      {% endif %}
+      
+      <th scope="col">Details</th>
+    </tr>
+  </thead>
+  <tbody>
+  
+    {% for incident in incidentsList %}
+                    
+        <tr>
+            <td>{{incident.reportID}}</td>
+            <td>{{incident.dateOfIncident}}</td>
+                        
+    <!-- Reporter name (for facstaff and admin) -->
+
+    {% if userType == "facstaff" %}
+        {% if not isAdmin %}
+            {% if incident.anonymousToReported == 1 %}
+                <td>Anonymous</td>
+            {% else %}
+                <td>{{incident.reporterName}}</td> 
+            {% endif %}
+
+        {% else %} <!-- user is admin -->
+            {% if incident.anonymousToAll == 1 %}
+                <td>Anonymous</td>
+            {% else %}
+                <td>{{incident.reporterName}}</td> 
+            {% endif %}
+        {% endif %}
+    {% endif %}     
+    
+            <!-- Reported name (for student or admin) -->
+            {% if userType == "student" %}
+            <td>{{incident.reportedName}}</td> 
+            {% endif %} 
+            
+            {% if isAdmin %}
+            <td>{{incident.reportedName}}</td> 
+            {% endif %}
+            
+            <!--AdvocateName-->
+            <td>{{incident.advocateName}}</td>
+        
+            <td>{{incident.description}}</td> 
+            
+            <!-- Attachment column -->
+            <td>
+                {% if incident.file %} 
+                <form action="{{ url_for('attachment', reportID=incident.reportID) }}">
+                    <input class="btn btn-outline-dark" type="submit" value="View File">
+                </form>
+                {% endif %}
+            </td>
+             {% if userType == "student" or admin %}
+                <td>
+                <form action="{{ url_for('editDetailPage', id=incident.reportID) }}">
+                    <input class="btn btn-outline-dark" type="submit" value="Edit Incident">
+                </form>
+            </td>
+            {% endif %} 
+            <td>
+                <form action="{{ url_for('incidentDetailPage', id=incident.reportID) }}">
+                    <input class="btn btn-outline-dark" type="submit" value="More Details">
+                </form>
+            </td>
+            
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+         
+    </body>
+{% endblock %}
+</html>
